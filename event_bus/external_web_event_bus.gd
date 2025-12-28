@@ -1,12 +1,10 @@
-extends Node
-class_name WebEventBus
+extends AbstractExternalEventBus
+class_name ExternalWebEventBus
 
-signal event_received(event_type: String, payload)
-
-var _event_handlers := {} # String -> Array[Callable]
 var _js_to_godot_callback_ref
 
 func _ready():
+	super._ready()
 	if OS.has_feature("web"):
 		_register_js_bridge()
 
@@ -27,23 +25,10 @@ func _register_js_bridge():
 # =====================================================
 # =============== API PÚBLICA GODOT ===================
 # =====================================================
-func send_event_to_js(event_type: String, payload):
-	_dispatch_local_event(event_type, payload)
+func send_event(event_type: String, payload):
+	super.send_event(event_type,payload)
 	_dispatch_event_to_js(event_type, payload)
 
-func on_event(event_type: String, handler: Callable):
-	if not _event_handlers.has(event_type):
-		_event_handlers[event_type] = []
-	_event_handlers[event_type].append(handler)
-
-# =====================================================
-# =============== INTERNO GODOT =======================
-# =====================================================
-func _dispatch_local_event(event_type: String, payload):
-	emit_signal("event_received", event_type, payload)
-	if _event_handlers.has(event_type):
-		for handler in _event_handlers[event_type]:
-			handler.call(payload)
 
 func _dispatch_event_to_js(event_type: String, payload):
 	var window = JavaScriptBridge.get_interface("window")
