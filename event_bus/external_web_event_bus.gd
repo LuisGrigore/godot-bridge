@@ -44,28 +44,34 @@ func _dispatch_event_to_js(event_type: String, payload):
 # =====================================================
 func _handle_event_from_js(args):
 	if args.is_empty():
-		push_warning("Recieved empty handle js event call.")
+		push_warning("Received empty handle js event call.")
 		return
-		
-	var event = args[0]
 	
-	if typeof(event) != TYPE_OBJECT:
-		push_warning("%s: Invalid event type, event should be: { type: String, payload: any }" % str(event))
+	var raw_event = args[0]
+	var event: Dictionary
+
+	if typeof(raw_event) == TYPE_STRING:
+		var parse_result = JSON.parse_string(raw_event)
+		event = parse_result
+	elif typeof(raw_event) == TYPE_DICTIONARY:
+		event = raw_event
+	else:
+		push_warning("Invalid event type, expected String (JSON) or Dictionary, got: %s" % str(typeof(raw_event)))
 		return
-		
-	if !event.hasOwnProperty("type"):
+
+	# Validaciones
+	if not event.has("type"):
 		push_warning("Event missing \"type\" property.")
 		return
-		
-	if !event.hasOwnProperty("payload"):
-		push_warning("Event missing \"payload\" property")
+	if not event.has("payload"):
+		push_warning("Event missing \"payload\" property.")
 		return
-		
+
 	var event_type = event["type"]
 	var payload = event["payload"]
-	
+
 	if typeof(event_type) != TYPE_STRING:
-		push_warning("The \"type\" property in not a String: %s" % str(event_type))
+		push_warning("The \"type\" property is not a String: %s" % str(event_type))
 		return
-		
+
 	super._dispatch_local_event(event_type, payload)

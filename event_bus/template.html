@@ -244,7 +244,6 @@
           const script = document.createElement("script");
           script.src = src;
           script.onload = () => {
-            console.log(`${src} cargado`);
             resolve();
           };
           script.onerror = () => reject(new Error(`Error al cargar ${src}`));
