@@ -68,4 +68,4 @@ func _handle_event_from_js(args):
 		push_warning("The \"type\" property in not a String: %s" % str(event_type))
 		return
 		
-	_dispatch_local_event(event_type, payload)
+	super._dispatch_local_event(event_type, payload)
